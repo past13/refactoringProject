@@ -47,7 +47,7 @@
 				var aspect = window.innerWidth / window.innerHeight;
 				camera = new THREE.OrthographicCamera( frustumSize * aspect / - 2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / - 2, 1, 1000 );
 
-				scene = new THREE.Scene();
+				scene = new THREE.Scene(); 
 				scene.background = new THREE.Color( 0xf0f0f0 );
 
 				var light = new THREE.DirectionalLight( 0xffffff, 1 );
@@ -87,7 +87,6 @@
 				container.appendChild( stats.dom );
 				console.log(scene)
 
-				document.addEventListener( 'mousemove', onDocumentMouseMove, false );
 
 				//
 
@@ -100,6 +99,11 @@
 				var aspect = window.innerWidth / window.innerHeight;
 
 				camera.left   = - frustumSize * aspect / 2;
+				camera.right  =   frustumSize * aspect / 2;
+				camera.top    =   frustumSize / 2;
+				camera.bottom = - frustumSize / 2;
+
+				camera.updateProjectionMatrix();		camera.left   = - frustumSize * aspect / 2;
 				camera.right  =   frustumSize * aspect / 2;
 				camera.top    =   frustumSize / 2;
 				camera.bottom = - frustumSize / 2;
@@ -125,6 +129,7 @@
 
 				requestAnimationFrame( animate );
 
+				console.log(scene.children)
 				render();
 				// stats.update();
 
@@ -144,14 +149,15 @@
 				// find intersections
 
 				raycaster.setFromCamera( mouse, camera );
-			
+
+
+
 
 				var intersects = raycaster.intersectObjects( scene.children );
 
 			
 
 				if ( intersects.length > 0 ) {
-					console.log(intersects) 
 					if ( INTERSECTED != intersects[ 0 ].object ) {
 
 						if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );

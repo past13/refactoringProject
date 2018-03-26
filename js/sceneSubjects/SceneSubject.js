@@ -1,33 +1,63 @@
-function SceneSubject(scene) {	
+function SceneSubject(scene, camera) {	
+	var mouse = new THREE.Vector2(), INTERSECTED;
+	var raycaster = new THREE.Raycaster();
+
+	console.log(xmlObj)
+	
 	console.log("SceneSubject")
-	var xmlObj = (function(dataURL) {  
-		var result = $.ajax({
-		  async: false,
-		  url: 'recipe.xml',
-		  method: 'GET',  
-		}).done();
-		return result;
-	  })();
 
 	var xml2bject = XML2jsobj(xmlObj.responseXML.documentElement);
 	var recipe = customizeXmlObj(xml2bject);
 	var container = prepareContainer(recipe);
 
 
-	//todo clear improve width/heigh of window
-	container.mesh.scale.set( .005, .005, .005 );
-	container.mesh.position.set(0, 0, -90);
+	container.mesh.naujaslaukas = 'gaf gaf';
 
-	scene.add(container.mesh);
+	scene.add(container.mesh); //container.mesh
 	
 	this.update = function(time) {
 		container.mesh.rotation.x += 0.001;
-		container.mesh.rotation.y += 0.005;
+		container.mesh.rotation.y += 0.001;
 
+		container.mesh.scale.set( .01, .01, .01 );
+		container.mesh.position.set(0, 0, -90);
+		
+		document.addEventListener( 'mousedown', onDocumentMouseDown, false ); //mousedown mousemove
+		
 		// const scale = Math.sin(time)+2;
-		// container.mesh.scale.set(scale, scale, scale);
+		// mesh.scale.set(scale, scale, scale);
+	}
+
+	function onDocumentMouseDown( event ) {
+		mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+		mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;	
+		event.preventDefault();
+	
+		raycaster.setFromCamera( mouse, camera );				
+
+		var listmesh = scene.children[1].children;
+		var intersects = raycaster.intersectObjects( listmesh );	
+
+		if ( intersects.length > 0 ) {			
+			if ( INTERSECTED != intersects[ 0 ].object ) {
+				if ( INTERSECTED ) 
+					INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );	
+					
+					INTERSECTED = intersects[ 0 ].object;
+					INTERSECTED.material = INTERSECTED.material.clone();
+					INTERSECTED.material.emissive.setHex( 0x2BD80D );	
+				console.log(INTERSECTED)
+				//mark groups
+				// INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();			
+				// INTERSECTED.material.emissive.setHex( 0x2BD80D );
+			}
+		} else {
+			if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+			INTERSECTED = null;
+		}
 	}
 }
+
 
 function createDefaultMesh(orderline) {  
 	//todo: add default meshes
@@ -150,7 +180,8 @@ function prepareContainer(recipe) {
 		  mesh.castShadow = true;
 		  mesh.receiveShadow = true;
 		  mesh.position.set(pack.x, pack.z, -pack.y);
-		  mesh.rotation.set(pack.rotation.x, pack.rotation.z, pack.rotation.y);
+			mesh.rotation.set(pack.rotation.x, pack.rotation.z, pack.rotation.y);
+			mesh.package = pack;
 		  container.mesh.add(mesh);
 	
 		  var edges = new THREE.EdgesGeometry( pack.orderline.geometry ); //missing sphere parameters
